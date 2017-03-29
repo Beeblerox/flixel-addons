@@ -3,6 +3,7 @@ package flixel.addons.display;
 import flixel.FlxSprite;
 import flixel.FlxStrip;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxTrianglesData;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
@@ -394,7 +395,7 @@ class FlxSliceSprite extends FlxSprite
 						
 						_matrix.translate(slicePoint.x, slicePoint.y);
 						
-						camera.drawUVQuad(sliceGraphic, quad, uv, _matrix, colorTransform, blend, smoothing, shader);
+						camera.drawUVQuad(sliceGraphic.bitmap, material, quad, uv, _matrix, colorTransform);
 						
 						_matrix.translate( -slicePoint.x, -slicePoint.y);
 					}
@@ -575,8 +576,7 @@ class FlxSliceSprite extends FlxStrip
 	 */
 	private var sliceRects:Array<FlxRect>;
 	
-	private var sliceVertices:Array<DrawData<Float>>;
-	private var sliceUVTs:Array<DrawData<Float>>;
+	private var sliceData:Array<FlxTrianglesData>;
 	
 	/**
 	 * Helper sprite, which does actual rendering in blit render mode.
@@ -599,23 +599,22 @@ class FlxSliceSprite extends FlxStrip
 		if (renderSprite == null)
 			renderSprite = new FlxSprite();
 		
-		sliceRects = [];
-		sliceVertices = [];
-		sliceUVTs = [];
-		
-		for (i in 0...9)
-		{
-			sliceRects[i] = new FlxRect();
-			sliceVertices[i] = new DrawData<Float>();
-			sliceUVTs[i] = new DrawData<Float>();
-		}
-		
 		indices[0] = 0;
 		indices[1] = 1;
 		indices[2] = 2;
 		indices[3] = 2;
 		indices[4] = 3;
 		indices[5] = 0;
+		
+		sliceRects = [];
+		sliceData = [];
+		
+		for (i in 0...9)
+		{
+			sliceRects[i] = new FlxRect();
+			sliceData[i] = new FlxTrianglesData();
+			sliceData[i].indices = indices;
+		}
 		
 		repeat = true;
 		sliceRect = SliceRect;
@@ -629,8 +628,8 @@ class FlxSliceSprite extends FlxStrip
 	{
 		sliceRect = null;
 		sliceRects = null;
-		sliceVertices = null;
-		sliceUVTs = null;
+		
+		sliceData = FlxDestroyUtil.destroyArray(sliceData);
 		slices = FlxDestroyUtil.destroyArray(slices);
 		helperFrame = FlxDestroyUtil.destroy(helperFrame);
 		renderSprite = FlxDestroyUtil.destroy(renderSprite);
@@ -752,8 +751,8 @@ class FlxSliceSprite extends FlxStrip
 		
 		if (tile != null)
 		{
-			var sliceV:DrawData<Float> = sliceVertices[TileIndex];
-			var sliceUVs:DrawData<Float> = sliceUVTs[TileIndex];
+			var sliceV:DrawData<Float> = sliceData[TileIndex].vertices;
+			var sliceUVs:DrawData<Float> = sliceData[TileIndex].uvs;
 			
 			sliceV[0] = X;
 			sliceV[1] = Y;
@@ -874,7 +873,7 @@ class FlxSliceSprite extends FlxStrip
 	private inline function drawTileOnCamera(TileIndex:Int, Camera:FlxCamera):Void
 	{
 		if (slices[TileIndex] != null)
-			Camera.drawTriangles(slices[TileIndex], sliceVertices[TileIndex], indices, sliceUVTs[TileIndex], _matrix, colorTransform, blend, repeat, smoothing);
+			Camera.drawTriangles(slices[TileIndex], material, sliceData[TileIndex], _matrix, colorTransform);
 	}
 	
 	override function set_alpha(Alpha:Float):Float

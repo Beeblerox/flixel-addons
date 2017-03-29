@@ -127,7 +127,14 @@ class FlxOutlineEffect implements IFlxEffect
 				}
 				
 				_flashPoint.setTo(0, 0);
+				
+				// TODO: change it when it will be fixed on OpenFl side...
+				#if flash
 				_borderPixels.copyPixels(_pixels, _pixels.rect, _flashPoint, bitmapData, null, true);
+				#else
+				_borderPixels.copyPixels(_pixels, _pixels.rect, _flashPoint, null, null, true);
+				#end
+				
 				_pixels.fillRect(_pixels.rect, FlxColor.TRANSPARENT);
 				
 				_matrix.identity();

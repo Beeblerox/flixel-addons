@@ -5,6 +5,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
+import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 
 /**
@@ -94,7 +95,12 @@ class FlxRainbowEffect implements IFlxEffect
 			_pixels.fillRect(_pixels.rect, FlxColor.fromHSB(_hue, 1, brightness, alpha));
 		}
 		
+		// TODO: change it when it will be fixed on OpenFl side...
+		#if flash
 		bitmapData.copyPixels(_pixels, _pixels.rect, _flashPoint, bitmapData, null, true);
+		#else
+		bitmapData.copyPixels(_pixels, _pixels.rect, _flashPoint, bitmapData, _flashPoint, true);
+		#end
 		
 		return bitmapData;
 	}
