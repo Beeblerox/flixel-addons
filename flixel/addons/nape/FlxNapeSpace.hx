@@ -66,9 +66,7 @@ class FlxNapeSpace extends FlxBasic
 		FlxG.plugins.add(new FlxNapeSpace());
 		
 		if (space == null)
-		{
 			space = new Space(new Vec2());
-		}
 		
 		FlxG.signals.stateSwitched.add(onStateSwitch);
 		
@@ -95,19 +93,13 @@ class FlxNapeSpace extends FlxBasic
 	public static function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 10, ?material:Material):Body
 	{
 		if (maxX == 0)
-		{
 			maxX = FlxG.width;
-		}
 		
 		if (maxY == 0)
-		{
 			maxY = FlxG.height;
-		}
 		
 		if (material == null)
-		{
 			material = new Material(0.4, 0.2, 0.38, 0.7);
-		}
 		
 		var walls:Body = new Body(BodyType.STATIC);
 		
@@ -175,9 +167,7 @@ class FlxNapeSpace extends FlxBasic
 	override public function update(elapsed:Float):Void
 	{
 		if (space != null && elapsed > 0)
-		{
 			space.step(elapsed, velocityIterations, positionIterations);
-		}
 	}
 	
 	/**
@@ -194,11 +184,11 @@ class FlxNapeSpace extends FlxBasic
 		
 		var sprite = shapeDebug.display;
 		
-		sprite.scaleX = FlxG.camera.totalScaleX;
-		sprite.scaleY = FlxG.camera.totalScaleY;
-		
-		sprite.x = -FlxG.camera.scroll.x * FlxG.camera.totalScaleX;
-		sprite.y = -FlxG.camera.scroll.y * FlxG.camera.totalScaleY;
+		sprite.x = 0;
+		sprite.y = 0;
+		sprite.scaleX = 1;
+		sprite.scaleY = 1;
+		FlxG.camera.transformObject(sprite);
 		#end
 	}
 }

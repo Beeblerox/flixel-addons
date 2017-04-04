@@ -73,10 +73,10 @@ class FlxTileSpecial extends FlxBasic
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
+		
 		if (FlxG.renderBlit)
-		{
 			dirty = false;
-		}
+		
 		// Modified from updateAnimation() in FlxSprite
 		if (animation != null && animation.delay > 0) 
 		{

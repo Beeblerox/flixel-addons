@@ -214,17 +214,31 @@ class FlxClothSprite extends FlxSprite
 		
 		//draw meshes and rect of pixels meshPixels
 		gfx.lineStyle(1, FlxColor.CYAN, 0.5);
-		gfx.drawRect(rect.x + _drawOffset.x, rect.y + _drawOffset.y, meshPixels.rect.width, meshPixels.rect.height);
+		
+		_drawOffset.copyTo(_point);
+		camera.transformVector(_point);
+		var px = _point.x;
+		var py = _point.y;
+		_point.set(meshPixels.rect.width, meshPixels.rect.height);
+		camera.transformVector(_point);
+		gfx.drawRect(rect.x + px, rect.y + py, _point.x, _point.y);
 		
 		for (p in points) 
 		{
-			gfx.drawCircle(rect.x + p.x, rect.y + p.y, 2);
+			_point.set(p.x, p.y);
+			camera.transformVector(_point);
+			gfx.drawCircle(rect.x + _point.x, rect.y + _point.y, 2);
 		}
 		
 		for (s in constraints) 
 		{
-			gfx.moveTo(rect.x + s.p0.x, rect.y + s.p0.y);
-			gfx.lineTo(rect.x + s.p1.x, rect.y + s.p1.y);
+			_point.set(s.p0.x,  s.p0.y);
+			camera.transformVector(_point);
+			gfx.moveTo(rect.x + _point.x, rect.y + _point.y);
+			
+			_point.set(s.p1.x,  s.p1.y);
+			camera.transformVector(_point);
+			gfx.lineTo(rect.x + _point.x, rect.y + _point.y);
 		}
 		
 		endDrawDebug(camera);
@@ -248,9 +262,7 @@ class FlxClothSprite extends FlxSprite
 		meshPixelsHeight = Std.int(Math.max(meshPixelsHeight, frameHeight));
 		
 		if (meshPixelsWidth <= 0 || meshPixelsHeight <= 0)
-		{
 			return;
-		}
 		
 		meshPixels = new BitmapData(meshPixelsWidth, meshPixelsHeight, true, FlxColor.TRANSPARENT);
 		
@@ -297,6 +309,7 @@ class FlxClothSprite extends FlxSprite
 						length: widthInTiles
 					});
 				}
+				
 				if (r > 0)
 				{
 					constraints.push({
@@ -323,6 +336,7 @@ class FlxClothSprite extends FlxSprite
 							p1: points[((r - 1) * columns) + c],
 							length: hyp
 						});
+						
 						constraints.push({
 							p0: points[(r * columns) + c],
 							p1: points[((r - 1) * columns) + c - 1],

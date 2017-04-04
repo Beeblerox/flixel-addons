@@ -172,18 +172,15 @@ class FlxNapeTilemap extends FlxTilemap
 	override public function drawDebug():Void 
 	{
 		if (!FlxNapeSpace.drawDebug)
-		{
 			super.drawDebug();
-		}
 	}
 	#end
 	
 	private function constructCollider(?mat:Material) 
 	{
 		if (mat == null) 
-		{
 			mat = new Material();
-		}
+		
 		var tileIndex = 0;
 		var startRow = -1;
 		var endRow = -1;
@@ -201,9 +198,8 @@ class FlxNapeTilemap extends FlxTilemap
 				{
 					//Mark the beginning of a new rectangle
 					if (startRow == -1) 
-					{
 						startRow = y;
-					}
+					
 					//Mark the tile as already read
 					_binaryData[tileIndex] = -1;
 					

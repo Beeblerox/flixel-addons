@@ -72,6 +72,7 @@ class FlxTilemapExt extends FlxTilemap
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
+		var dirty:Bool = false;
 		
 		if (_specialTiles != null && _specialTiles.length > 0) 
 		{
@@ -80,9 +81,13 @@ class FlxTilemapExt extends FlxTilemap
 				if (tile != null && tile.hasAnimation()) 
 				{
 					tile.update(elapsed);
+					dirty = dirty || tile.dirty;
 				}
 			}
 		}
+		
+		if (dirty)
+			setDirty(true);
 	}
 	
 	/**
@@ -93,6 +98,16 @@ class FlxTilemapExt extends FlxTilemap
 	 */
 	override private function drawTilemap(Buffer:FlxTilemapBuffer, Camera:FlxCamera):Void 
 	{
+		var isColored:Bool = ((alpha != 1) || (color != 0xffffff));
+		
+		var drawX:Float = 0;
+		var drawY:Float = 0;
+		var scaledWidth:Float = _tileWidth;
+		var scaledHeight:Float = _tileHeight;
+		
+		var _tileTransformMatrix:FlxMatrix = null;
+		var matrixToUse:FlxMatrix;
+		
 		if (FlxG.renderBlit)
 		{
 			Buffer.fill();
@@ -105,17 +120,9 @@ class FlxTilemapExt extends FlxTilemap
 			_helperPoint.y = isPixelPerfectRender(Camera) ? Math.floor(_helperPoint.y) : _helperPoint.y;
 		}
 		
-		var drawX:Float;
-		var drawY:Float;
-		
-		var _tileTransformMatrix:FlxMatrix = null;
-		var matrixToUse:FlxMatrix;
-		
-		var isColored:Bool = ((alpha != 1) || (color != 0xffffff));
-		
 		// Copy tile images into the tile buffer
-		_point.x = (Camera.scroll.x * scrollFactor.x) - x - offset.x; //modified from getScreenXY()
-		_point.y = (Camera.scroll.y * scrollFactor.y) - y - offset.y;
+		_point.x = (Camera.scroll.x * scrollFactor.x) - x - offset.x + Camera.viewOffsetX; //modified from getScreenPosition()
+		_point.y = (Camera.scroll.y * scrollFactor.y) - y - offset.y + Camera.viewOffsetY;
 		var screenXInTiles:Int = Math.floor(_point.x / _tileWidth);
 		var screenYInTiles:Int = Math.floor(_point.y / _tileHeight);
 		var screenRows:Int = Buffer.rows;
@@ -136,7 +143,7 @@ class FlxTilemapExt extends FlxTilemap
 		var debugTile:BitmapData;
 		#end 
 		
-		var isSpecial = false;
+		var isSpecial:Bool = false;
 		
 		for (row in 0...screenRows)
 		{
@@ -145,9 +152,9 @@ class FlxTilemapExt extends FlxTilemap
 			
 			for (column in 0...screenColumns)
 			{
+				tile = _tileObjects[_data[columnIndex]];
 				isSpecial = false;
 				special = null;
-				tile = _tileObjects[_data[columnIndex]];
 				
 				if (_specialTiles != null && _specialTiles[columnIndex] != null) 
 				{
@@ -179,7 +186,9 @@ class FlxTilemapExt extends FlxTilemap
 						else
 							debugTile = _debugTileSolid; 
 						
+						offset.addToFlash(_flashPoint);
 						Buffer.pixels.copyPixels(debugTile, _debugRect, _flashPoint, null, null, true);
+						offset.subtractFromFlash(_flashPoint);
 					}
 				}
 			#end
@@ -231,6 +240,8 @@ class FlxTilemapExt extends FlxTilemap
 			
 			Buffer.blend = blend;
 		}
+		
+		Buffer.dirty = false;
 	}
 	
 	/**
