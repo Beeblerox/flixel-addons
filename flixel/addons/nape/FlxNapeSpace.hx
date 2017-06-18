@@ -2,6 +2,7 @@ package flixel.addons.nape;
 
 import flash.display.BitmapData;
 import flixel.FlxBasic;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.system.ui.FlxSystemButton;
 import nape.geom.Vec2;
@@ -173,7 +174,6 @@ class FlxNapeSpace extends FlxBasic
 	/**
 	 * Draws debug graphics.
 	 */
-	@:access(flixel.FlxCamera)
 	override public function draw():Void
 	{
 		#if FLX_DEBUG
@@ -183,13 +183,17 @@ class FlxNapeSpace extends FlxBasic
 		shapeDebug.clear();
 		shapeDebug.draw(space);
 		
+		var camera:FlxCamera = FlxG.camera;
 		var sprite = shapeDebug.display;
 		
-		sprite.x = 0;
-		sprite.y = 0;
-		sprite.scaleX = 1;
-		sprite.scaleY = 1;
-		FlxG.camera.transformObject(sprite);
+		sprite.scaleX = camera.totalScaleX;
+		sprite.scaleY = camera.totalScaleY;
+		
+		sprite.x = -camera.scroll.x * camera.totalScaleX;
+		sprite.y = -camera.scroll.y * camera.totalScaleY;
+		
+		sprite.x -= 0.5 * camera.width * (camera.scaleX - camera.initialZoom) * FlxG.scaleMode.scale.x;
+		sprite.y -= 0.5 * camera.height * (camera.scaleY - camera.initialZoom) * FlxG.scaleMode.scale.y;
 		#end
 	}
 }

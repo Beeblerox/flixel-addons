@@ -7,8 +7,6 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.system.render.blit.FlxBlitView;
-import flixel.system.render.hardware.FlxHardwareView;
 import flixel.text.FlxText;
 
 /**
@@ -19,7 +17,6 @@ import flixel.text.FlxText;
 class FlxTextField extends FlxText
 {
 	private var _camera:FlxCamera;
-	private var _addedToDisplay:Bool = false;
 	
 	/**
 	 * Creates a new FlxText object at the specified position.
@@ -38,11 +35,13 @@ class FlxTextField extends FlxText
 		
 		textField.multiline = false;
 		textField.wordWrap = false;
+		textField.mouseEnabled = false;
+		updateDefaultFormat();
 		
 		if (Camera == null)
 			Camera = FlxG.camera;
 		
-		_camera = Camera;
+		camera = Camera;
 		dirty = false;
 	}
 	
@@ -51,10 +50,7 @@ class FlxTextField extends FlxText
 	 */
 	override public function destroy():Void
 	{
-		if (textField.parent != null)
-			textField.parent.removeChild(textField);
-		
-		_camera = null;
+		camera = null;
 		super.destroy();
 	}
 	
@@ -87,27 +83,27 @@ class FlxTextField extends FlxText
 		return Pixels;
 	}
 	
-	override private function set_alpha(Alpha:Float):Float
+	override private function set_alpha(value:Float):Float
 	{
-		alpha = FlxMath.bound(Alpha, 0, 1);
+		alpha = FlxMath.bound(value, 0, 1);
 		textField.alpha = alpha;
-		return Alpha;
+		return value;
 	}
 	
-	override private function set_height(Height:Float):Float
+	override private function set_height(value:Float):Float
 	{
-		Height = super.set_height(Height);
+		value = super.set_height(value);
 		
 		if (textField != null)
-			textField.height = Height;
+			textField.height = value;
 		
-		return Height;
+		return value;
 	}
 	
-	override private function set_visible(Value:Bool):Bool
+	override private function set_visible(value:Bool):Bool
 	{
-		textField.visible = Value;
-		return super.set_visible(Value);
+		textField.visible = value;
+		return super.set_visible(value);
 	}
 	
 	override public function kill():Void 
@@ -125,30 +121,21 @@ class FlxTextField extends FlxText
 	/**
 	 * Called by game loop, updates then blits or renders current frame of animation to the screen
 	 */
+	@:access(flixel.FlxCamera)
 	override public function draw():Void
 	{
-		if (_camera == null)
+		textField.visible = (camera != null && camera.visible && camera.exists && isOnScreen(camera));
+		
+		if (!textField.visible)
 			return;
 		
-		if (!_addedToDisplay)
-		{
-			this.camera = _camera;
-			updateDefaultFormat();
-		}
+		textField.x = x - offset.x;
+		textField.y = y - offset.y;
 		
-		if (!_camera.visible || !_camera.exists || !isOnScreen(_camera))
-			textField.visible = false;
-		else
-			textField.visible = true;
+		textField.scaleX = scale.x;
+		textField.scaleY = scale.y;
 		
-		_point.x = x - (_camera.scroll.x * scrollFactor.x) - offset.x;
-		_point.y = y - (_camera.scroll.y * scrollFactor.y) - offset.y;
-		
-		textField.x = (_point.x - 0.5 * _camera.width * FlxG.scaleMode.scale.x);
-		textField.y = (_point.y - 0.5 * _camera.height * FlxG.scaleMode.scale.y);
-		
-		textField.scaleX = FlxG.scaleMode.scale.x;
-		textField.scaleY = FlxG.scaleMode.scale.y;
+		camera.transformObject(textField);
 		
 		#if FLX_DEBUG
 		FlxBasic.visibleCount++;
@@ -160,21 +147,14 @@ class FlxTextField extends FlxText
 		return _camera;
 	}
 	
-	override private function set_camera(Value:FlxCamera):FlxCamera 
+	override private function set_camera(value:FlxCamera):FlxCamera 
 	{
 		if (textField != null && textField.parent != null)
 			textField.parent.removeChild(textField);
 		
-		if (Value != null)
-		{
-			Value.view.display.addChild(textField);
-			_addedToDisplay = true;
-		}
-		else
-		{
-			_addedToDisplay = false;
-		}	
+		if (value != null)
+			value.view.display.addChild(textField);
 		
-		return _camera = Value;
+		return _camera = value;
 	}
 }
