@@ -44,7 +44,6 @@ class FlxTransitionSprite extends FlxSprite
 		loadGraphic(Graphic, true, GraphicWidth, GraphicHeight);
 		
 		graphic.persist = true;
-		graphic.destroyOnNoUse = false;
 		
 		var inArray:Array<Int> = [];
 		var outArray:Array<Int> = [];
